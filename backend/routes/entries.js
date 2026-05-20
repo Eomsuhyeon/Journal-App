@@ -5,24 +5,12 @@ const Entry = require('../models/Entry');
 // 일기 작성
 router.post('/', auth, async (req, res) => {
   try {
-    const { question, answer, mood, isPublic } = req.body;
+    const { question, answer, mood, isPublic, image } = req.body; // image 추가
     const entry = await Entry.create({
       user: req.userId,
-      question, answer, mood, isPublic,
+      question, answer, mood, isPublic, image, // image 추가
     });
     res.json(entry);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-// 사진만 모아보기 API 추가
-router.get('/photos', auth, async (req, res) => {
-  try {
-    const entries = await Entry.find({
-      user: req.userId,
-      image: { $ne: null }
-    }).sort({ createdAt: -1 }).select('image createdAt question mood');
-    res.json(entries);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -38,11 +26,29 @@ router.get('/mine', auth, async (req, res) => {
   }
 });
 
+// 사진만 모아보기
+router.get('/photos', auth, async (req, res) => {
+  try {
+    const entries = await Entry.find({
+      user: req.userId,
+      image: { $ne: null }
+    }).sort({ createdAt: -1 }).select('image createdAt question mood');
+    res.json(entries);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // 친구 피드 조회
 router.get('/friends-feed', auth, async (req, res) => {
   try {
     const User = require('../models/User');
     const me = await User.findById(req.userId);
+
+    if (!me.friends || me.friends.length === 0) {
+      return res.json([]);
+    }
+
     const entries = await Entry.find({
       user: { $in: me.friends },
       isPublic: true,
@@ -50,8 +56,10 @@ router.get('/friends-feed', auth, async (req, res) => {
     .populate('user', 'nickname')
     .sort({ createdAt: -1 })
     .limit(20);
+
     res.json(entries);
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: err.message });
   }
 });

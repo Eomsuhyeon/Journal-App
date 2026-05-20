@@ -1,16 +1,18 @@
 import { useState, useEffect } from 'react';
-import { getTodayQuestion, getFriendsFeed, getMyEntries } from '../api';
+import { getTodayQuestion, getFriendsFeed, getMyEntries, getMyFriends } from '../api';
 
 export default function Home({ goTo }) {
   const [question, setQuestion] = useState('로딩 중...');
   const [feed, setFeed] = useState([]);
   const [answeredToday, setAnsweredToday] = useState(false);
-
+  const [friends, setFriends] = useState([]);
   useEffect(() => {
     getTodayQuestion()
       .then(d => { if (d.question) setQuestion(d.question); })
       .catch(() => setQuestion('오늘 나에게 가장 솔직한 감정은?'));
-
+    getMyFriends().then(data => {
+      if (Array.isArray(data)) setFriends(data);
+    });
     getFriendsFeed()
       .then(data => { if (Array.isArray(data)) setFeed(data); else setFeed([]); })
       .catch(() => setFeed([]));
@@ -56,7 +58,21 @@ export default function Home({ goTo }) {
       {/* 친구 피드 */}
       <div style={{ fontSize: 11, letterSpacing: '0.1em', color: '#8A8480', marginBottom: 14 }}>친구들의 오늘</div>
       {feed.length === 0 ? (
-        <div style={{ fontSize: 13, color: '#8A8480' }}>아직 친구가 없어요. 친구를 추가해보세요!</div>
+        <div style={{ textAlign: 'center', padding: '24px 0' }}>
+         {friends.length === 0 ? (
+          <>
+            <div style={{ fontSize: 13, color: '#8A8480', marginBottom: 12 }}>아직 친구가 없어요</div>
+            <button onClick={() => goTo('friends')}
+              style={{ padding: '10px 24px', background: '#1A1714', color: '#F5F0E8', border: 'none', borderRadius: 12, fontSize: 13, cursor: 'pointer' }}>
+              친구 추가하기 →
+            </button>
+          </>
+      ) : (
+        <div style={{ fontSize: 13, color: '#8A8480' }}>
+          아직 친구가 오늘 일기를 작성하지 않았어요 🌙
+        </div>
+      )}
+    </div>
       ) : (
         feed.map(entry => (
           <div key={entry._id} style={{ padding: '12px 0', borderBottom: '1px solid #E8E0D4' }}>

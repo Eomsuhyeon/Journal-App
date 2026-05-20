@@ -12,7 +12,10 @@ export default function Login({ onLogin }) {
       setIsRegister(false);
     } else {
       const data = await login(form);
-      if (data.token) onLogin(data.token);
+      if (data.token){
+        localStorage.setItem('nickname', data.nickname);
+        onLogin(data.token);
+      } 
       else alert(data.error);
     }
   };

@@ -15,6 +15,18 @@ router.post('/', auth, async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+// 사진만 모아보기 API 추가
+router.get('/photos', auth, async (req, res) => {
+  try {
+    const entries = await Entry.find({
+      user: req.userId,
+      image: { $ne: null }
+    }).sort({ createdAt: -1 }).select('image createdAt question mood');
+    res.json(entries);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
 // 내 일기 전체 조회 (앨범)
 router.get('/mine', auth, async (req, res) => {

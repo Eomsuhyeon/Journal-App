@@ -16,12 +16,12 @@ export default function Home({ goTo }) {
       .catch(() => setFeed([]));
 
     // 오늘 이미 답했는지 확인
-    getMyEntries().then(entries => {
-      if (!Array.isArray(entries)) return;
-      const today = new Date().toDateString();
-      const todayEntry = entries.find(e => new Date(e.createdAt).toDateString() === today);
-      if (todayEntry) setAnsweredToday(true);
-    });
+    // getMyEntries().then(entries => {
+    //   if (!Array.isArray(entries)) return;
+    //   const today = new Date().toDateString();
+    //   const todayEntry = entries.find(e => new Date(e.createdAt).toDateString() === today);
+    //   if (todayEntry) setAnsweredToday(true);
+    // });
   }, []);
 
   return (

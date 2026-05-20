@@ -5,6 +5,7 @@ const EntrySchema = new mongoose.Schema({
   question:  { type: String, required: true },
   answer:    { type: String, required: true },
   mood:      { type: String, enum: ['😊','😐','😔','😤','🥹'], required: true },
+  image:     { type: String, default: null },
   isPublic:  { type: Boolean, default: false }, // 친구 공개 여부
   reactions: [{
     from: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },

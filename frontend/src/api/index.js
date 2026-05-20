@@ -44,3 +44,5 @@ export const addFriend = (friendId) =>
 
 export const getMyFriends = () =>
   fetch(`${BASE_URL}/friends`, { headers: headers() }).then(r => r.json());
+export const getMyPhotos = () =>
+  fetch(`${BASE_URL}/entries/photos`, { headers: headers() }).then(r => r.json());

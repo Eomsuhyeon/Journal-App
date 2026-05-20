@@ -4,7 +4,7 @@ import Write from './pages/Write';
 import Album from './pages/Album';
 import Report from './pages/Report';
 import Login from './pages/Login';
-
+import Gallery from './pages/Gallery';
 export default function App() {
   const [page, setPage] = useState('login');
   const [token, setToken] = useState(localStorage.getItem('token'));
@@ -33,13 +33,14 @@ export default function App() {
       {page === 'write'  && <Write  goTo={setPage} />}
       {page === 'album'  && <Album  goTo={setPage} />}
       {page === 'report' && <Report goTo={setPage} />}
-
+      {page === 'gallery' && <Gallery goTo={setPage} />}
       {/* 하단 네비게이션 */}
       <nav style={{ display: 'flex', borderTop: '1px solid #E8E0D4', position: 'fixed', bottom: 0, width: '100%', maxWidth: 400, background: '#F5F0E8' }}>
         {[
           { key: 'home',   label: 'TODAY',  icon: '◎' },
           { key: 'album',  label: 'ALBUM',  icon: '◫' },
-          { key: 'report', label: 'REPORT', icon: '✦' },
+          { key: 'gallery', label: 'PHOTOS',  icon: '📷' },
+          { key: 'report',  label: 'REPORT',  icon: '✦' },
         ].map(nav => (
           <button key={nav.key} onClick={() => setPage(nav.key)}
             style={{ flex: 1, padding: '12px 0 16px', background: 'none', border: 'none', cursor: 'pointer',

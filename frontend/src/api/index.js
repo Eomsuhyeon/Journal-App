@@ -46,3 +46,5 @@ export const getMyFriends = () =>
   fetch(`${BASE_URL}/friends`, { headers: headers() }).then(r => r.json());
 export const getMyPhotos = () =>
   fetch(`${BASE_URL}/entries/photos`, { headers: headers() }).then(r => r.json());
+export const getMyStreak = () =>
+  fetch(`${BASE_URL}/friends/me/streak`, { headers: headers() }).then(r => r.json());

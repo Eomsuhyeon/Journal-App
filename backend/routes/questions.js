@@ -1,9 +1,9 @@
 const router = require('express').Router();
 const auth = require('../middleware/auth');
 const Entry = require('../models/Entry');
-const { GoogleGenerativeAI } = require('@google/generative-ai');
+const Groq = require('groq-sdk');
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
 const fallbackQuestions = [
   '오늘 나에게 가장 솔직한 감정은?',
@@ -25,7 +25,6 @@ router.get('/today', auth, async (req, res) => {
       .limit(5)
       .select('question answer mood');
 
-    // 일기 없으면 기본 질문
     if (recentEntries.length === 0) {
       return res.json({ question: fallbackQuestions[0] });
     }
@@ -35,14 +34,19 @@ router.get('/today', auth, async (req, res) => {
     ).join('\n\n');
 
     try {
-      const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
-      const prompt = `다음은 사용자의 최근 일기 답변들이야:\n\n${context}\n\n이 사람에게 오늘 던질 자기탐구 질문 1개만 만들어줘. 답변 맥락을 자연스럽게 이어받아서, 너무 무겁지 않게, 30자 이내로, 질문만 출력해 다른 말 없이`;
-      const result = await model.generateContent(prompt);
-      const question = result.response.text().trim();
+      const completion = await groq.chat.completions.create({
+        model: 'llama-3.3-70b-versatile',
+        messages: [{
+          role: 'user',
+          content: `다음은 사용자의 최근 일기 답변들이야:\n\n${context}\n\n이 사람에게 오늘 던질 자기탐구 질문 1개만 만들어줘. 답변 맥락을 자연스럽게 이어받아서, 너무 무겁지 않게, 30자 이내로, 질문만 출력해 다른 말 없이`
+        }],
+        max_tokens: 100,
+      });
+
+      const question = completion.choices[0].message.content.trim();
       res.json({ question });
     } catch (aiErr) {
-      // AI 실패하면 fallback 질문 사용
-      console.error('Gemini 오류, fallback 사용:', aiErr.message);
+      console.error('Groq 오류, fallback 사용:', aiErr.message);
       const written = recentEntries.map(e => e.question);
       const remaining = fallbackQuestions.filter(q => !written.includes(q));
       const random = remaining.length > 0

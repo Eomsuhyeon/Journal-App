@@ -5,11 +5,36 @@ const Entry = require('../models/Entry');
 // 일기 작성
 router.post('/', auth, async (req, res) => {
   try {
-    const { question, answer, mood, isPublic, image } = req.body; // image 추가
+    const { question, answer, mood, isPublic, image } = req.body;
     const entry = await Entry.create({
       user: req.userId,
-      question, answer, mood, isPublic, image, // image 추가
+      question, answer, mood, isPublic, image,
     });
+
+    // 스트릭 업데이트
+    const User = require('../models/User');
+    const user = await User.findById(req.userId);
+    const now = new Date();
+    const today = now.toDateString();
+    const lastWritten = user.lastWrittenAt ? new Date(user.lastWrittenAt).toDateString() : null;
+    const yesterday = new Date(now - 86400000).toDateString();
+
+    if (lastWritten === today) {
+      // 오늘 이미 썼으면 스트릭 그대로
+    } else if (lastWritten === yesterday) {
+      // 어제 썼으면 +1
+      await User.findByIdAndUpdate(req.userId, {
+        streak: user.streak + 1,
+        lastWrittenAt: now,
+      });
+    } else {
+      // 하루라도 빠지면 1로 리셋
+      await User.findByIdAndUpdate(req.userId, {
+        streak: 1,
+        lastWrittenAt: now,
+      });
+    }
+
     res.json(entry);
   } catch (err) {
     res.status(500).json({ error: err.message });

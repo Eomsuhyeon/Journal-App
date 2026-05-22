@@ -37,5 +37,13 @@ router.get('/', auth, async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-
+// 내 스트릭 조회
+router.get('/me/streak', auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.userId).select('streak nickname lastWrittenAt');
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 module.exports = router;
